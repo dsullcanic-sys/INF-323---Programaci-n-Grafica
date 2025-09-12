@@ -102,66 +102,6 @@
             background: linear-gradient(45deg, #2193b0, #6dd5ed, #2193b0);
         }
         
-        .practices {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-            gap: 20px;
-            margin-top: 30px;
-        }
-        
-        .practice-card {
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 15px;
-            padding: 20px;
-            transition: transform 0.3s;
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-            cursor: pointer;
-        }
-        
-        .practice-card:hover {
-            transform: translateY(-5px);
-            background: rgba(255, 255, 255, 0.15);
-            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
-        }
-        
-        .practice-card h3 {
-            color: #8ec5fc;
-            margin-bottom: 15px;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-            padding-bottom: 10px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        
-        .practice-card p {
-            color: #cccccc;
-            margin-bottom: 15px;
-            line-height: 1.5;
-        }
-        
-        .status {
-            display: inline-block;
-            padding: 5px 12px;
-            border-radius: 20px;
-            font-size: 0.8rem;
-            font-weight: bold;
-        }
-        
-        .completed {
-            background-color: #4caf50;
-        }
-        
-        .in-progress {
-            background-color: #ff9800;
-        }
-        
-        .not-started {
-            background-color: #f44336;
-        }
-        
         .repo-info {
             background: rgba(0, 0, 0, 0.2);
             padding: 15px;
@@ -169,14 +109,6 @@
             margin: 20px 0;
             font-family: monospace;
             word-break: break-all;
-        }
-        
-        footer {
-            text-align: center;
-            margin-top: 50px;
-            padding: 20px;
-            border-top: 2px solid rgba(255, 255, 255, 0.1);
-            color: #cccccc;
         }
         
         .subject-info {
@@ -201,89 +133,15 @@
             color: #6ab1e7;
         }
         
-        .scene-viewer {
-            margin-top: 40px;
-            background: rgba(0, 0, 0, 0.2);
-            border-radius: 15px;
+        footer {
+            text-align: center;
+            margin-top: 50px;
             padding: 20px;
-            display: none;
-        }
-        
-        .scene-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 15px;
-        }
-        
-        .close-viewer {
-            background: #f44336;
-            color: white;
-            border: none;
-            border-radius: 50%;
-            width: 40px;
-            height: 40px;
-            font-size: 1.2rem;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-        
-        .scene-container {
-            width: 100%;
-            height: 500px;
-            border: 2px solid rgba(255, 255, 255, 0.1);
-            border-radius: 10px;
-            overflow: hidden;
-        }
-        
-        .scene-container iframe {
-            width: 100%;
-            height: 100%;
-            border: none;
-            background: white;
-        }
-        
-        .scene-gallery {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-            gap: 20px;
-            margin-top: 30px;
-        }
-        
-        .scene-item {
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 10px;
-            overflow: hidden;
-            transition: transform 0.3s;
-            cursor: pointer;
-        }
-        
-        .scene-item:hover {
-            transform: translateY(-5px);
-        }
-        
-        .scene-thumb {
-            width: 100%;
-            height: 160px;
-            background: linear-gradient(45deg, #8ec5fc, #e0c3fc);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 3rem;
-            color: #0f2027;
-        }
-        
-        .scene-desc {
-            padding: 15px;
+            border-top: 2px solid rgba(255, 255, 255, 0.1);
+            color: #cccccc;
         }
         
         @media (max-width: 768px) {
-            .practices, .scene-gallery {
-                grid-template-columns: 1fr;
-            }
-            
             h1 {
                 font-size: 2rem;
             }
@@ -306,10 +164,6 @@
             .teacher-icon {
                 margin-right: 0;
                 margin-bottom: 10px;
-            }
-            
-            .scene-container {
-                height: 300px;
             }
         }
     </style>
@@ -357,43 +211,6 @@
                     <p>Jhonny Roberto Felipez Andrade</p>
                 </div>
             </div>
-            
-            <h2>Escenas de Programación Gráfica</h2>
-            <p>Selecciona una escena para visualizarla:</p>
-            
-            <div class="scene-gallery">
-                <div class="scene-item" data-scene="escena1.html">
-                    <div class="scene-thumb">
-                        <i class="fas fa-cube"></i>
-                    </div>
-                    <div class="scene-desc">
-                        <h3>Escena 1</h3>
-                        <p>Primera escena de gráficos por computadora</p>
-                    </div>
-                </div>
-                
-                <div class="scene-item" data-scene="escena2.html">
-                    <div class="scene-thumb">
-                        <i class="fas fa-cubes"></i>
-                    </div>
-                    <div class="scene-desc">
-                        <h3>Escena 2</h3>
-                        <p>Segunda escena con elementos gráficos</p>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="scene-viewer" id="sceneViewer">
-                <div class="scene-header">
-                    <h3 id="viewerTitle">Visualizador de Escenas</h3>
-                    <button class="close-viewer" id="closeViewer">
-                        <i class="fas fa-times"></i>
-                    </button>
-                </div>
-                <div class="scene-container">
-                    <iframe id="sceneFrame" src="" frameborder="0"></iframe>
-                </div>
-            </div>
         </section>
         
         <footer>
@@ -405,18 +222,6 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            // Animación de aparición para las tarjetas
-            const cards = document.querySelectorAll('.practice-card');
-            cards.forEach((card, index) => {
-                card.style.opacity = 0;
-                card.style.transform = 'translateY(20px)';
-                setTimeout(() => {
-                    card.style.transition = 'opacity 0.5s, transform 0.5s';
-                    card.style.opacity = 1;
-                    card.style.transform = 'translateY(0)';
-                }, 100 * index);
-            });
-            
             // Efecto de escritura para el nombre
             const nameElement = document.querySelector('.name');
             const fullName = 'David Sullcani Chuquimia';
@@ -433,32 +238,6 @@
             // Iniciar la animación de escritura
             nameElement.textContent = '';
             setTimeout(typeWriter, 500);
-            
-            // Funcionalidad del visualizador de escenas
-            const sceneItems = document.querySelectorAll('.scene-item');
-            const sceneViewer = document.getElementById('sceneViewer');
-            const sceneFrame = document.getElementById('sceneFrame');
-            const viewerTitle = document.getElementById('viewerTitle');
-            const closeViewer = document.getElementById('closeViewer');
-            
-            sceneItems.forEach(item => {
-                item.addEventListener('click', function() {
-                    const sceneFile = this.getAttribute('data-scene');
-                    const sceneName = this.querySelector('h3').textContent;
-                    
-                    sceneFrame.src = sceneFile;
-                    viewerTitle.textContent = sceneName;
-                    sceneViewer.style.display = 'block';
-                    
-                    // Desplazarse suavemente al visualizador
-                    sceneViewer.scrollIntoView({ behavior: 'smooth' });
-                });
-            });
-            
-            closeViewer.addEventListener('click', function() {
-                sceneViewer.style.display = 'none';
-                sceneFrame.src = '';
-            });
         });
     </script>
 </body>
