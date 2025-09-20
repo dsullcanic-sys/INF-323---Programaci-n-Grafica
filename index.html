@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Programación Gráfica - Explorador</title>
+<title>Programación Gráfica - David Sullcani Chuquimia</title>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 <style>
 * { margin:0; padding:0; box-sizing:border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;}
@@ -13,31 +13,111 @@ header { text-align:center; padding:30px 0; margin-bottom:30px; border-bottom:2p
 h1 { font-size:2.5rem; margin-bottom:10px; color:#ffffff; text-shadow:0 2px 4px rgba(0,0,0,0.3);}
 h2 { font-size:1.8rem; margin:25px 0 15px; color:#6ab1e7;}
 h3 { font-size:1.4rem; margin:20px 0 10px; color:#8ec5fc;}
+.profile { display:flex; flex-direction:column; align-items:center; margin-bottom:40px;}
+.avatar { width:150px; height:150px; border-radius:50%; background: linear-gradient(45deg, #8ec5fc, #e0c3fc); display:flex; align-items:center; justify-content:center; margin-bottom:20px; font-size:3rem; color:#0f2027; box-shadow:0 8px 16px rgba(0,0,0,0.2);}
+.info { text-align:center;}
+.name { font-size:1.8rem; margin-bottom:10px; color:#ffffff;}
+.github-link { display:inline-block; background: linear-gradient(45deg, #2193b0, #6dd5ed); color:white; padding:12px 25px; border-radius:30px; text-decoration:none; font-weight:bold; margin-top:15px; transition: transform 0.3s, box-shadow 0.3s; box-shadow:0 4px 8px rgba(0,0,0,0.2);}
+.github-link:hover { transform: translateY(-3px); box-shadow:0 10px 20px rgba(0,0,0,0.3); background: linear-gradient(45deg, #2193b0, #6dd5ed, #2193b0);}
+.repo-info { background: rgba(0,0,0,0.2); padding:15px; border-radius:10px; margin:20px 0; font-family: monospace; word-break: break-all;}
+.subject-info { background: rgba(255,255,255,0.05); padding:20px; border-radius:10px; margin:20px 0;}
+.teacher-info { display:flex; align-items:center; background: rgba(255,255,255,0.05); padding:15px; border-radius:10px; margin:15px 0;}
+.teacher-icon { font-size:2rem; margin-right:15px; color:#6ab1e7;}
+footer { text-align:center; margin-top:50px; padding:20px; border-top:2px solid rgba(255,255,255,0.1); color:#cccccc;}
 .file-explorer { background: rgba(0,0,0,0.2); padding:15px; border-radius:10px; margin:20px 0; font-family: monospace;}
-.file-item { margin:5px 0; }
-.file-item a { color:#fff; text-decoration:none; }
-.file-item a:hover { text-decoration:underline; }
-iframe { width:100%; height:500px; border:none; margin-top:15px; border-radius:10px;}
-audio { margin-left:10px; vertical-align:middle; }
+.file-item { margin:5px 0;}
+.file-item a { color:#fff; text-decoration:none;}
+.file-item a:hover { text-decoration:underline;}
+@media (max-width:768px){
+    h1 { font-size:2rem;}
+    h2 { font-size:1.5rem;}
+    .avatar { width:120px; height:120px; font-size:2.5rem;}
+    .teacher-info { flex-direction:column; text-align:center;}
+    .teacher-icon { margin-right:0; margin-bottom:10px;}
+}
 </style>
 </head>
 <body>
 <div class="container">
-<header>
-    <h1>INF-323 Programación Gráfica</h1>
-    <p>Universidad Mayor de San Andrés - UMSA</p>
-</header>
+    <header>
+        <h1>INF-323 Programación Gráfica</h1>
+        <p>Universidad Mayor de San Andrés - UMSA</p>
+    </header>
 
-<h2>Explorador de Archivos</h2>
-<div id="file-list" class="file-explorer"></div>
-<iframe id="file-frame" src=""></iframe>
+    <section class="profile">
+        <div class="avatar">
+            <i class="fas fa-user"></i>
+        </div>
+        <div class="info">
+            <div class="name">David Sullcani Chuquimia</div>
+            <p>Estudiante de Programación Gráfica</p>
+            <a href="https://github.com/dsullcanic-sys/INF-323---Programaci-n-Grafica.git" class="github-link" target="_blank">
+                <i class="fab fa-github"></i> Ver mi Repositorio
+            </a>
+        </div>
+    </section>
+
+    <div class="repo-info">
+        <strong>Repositorio GitHub:</strong><br>
+        https://github.com/dsullcanic-sys/INF-323---Programaci-n-Grafica.git
+    </div>
+
+    <section class="content">
+        <div class="subject-info">
+            <h2>Información de la Materia</h2>
+            <p><strong>Asignatura:</strong> INF-323 - Programación Gráfica</p>
+            <p><strong>Universidad:</strong> Universidad Mayor de San Andrés (UMSA)</p>
+            <p><strong>Año:</strong> 2025</p>
+            <p><strong>Semestre:</strong> Primer Semestre</p>
+        </div>
+
+        <div class="teacher-info">
+            <div class="teacher-icon">
+                <i class="fas fa-chalkboard-teacher"></i>
+            </div>
+            <div>
+                <h3>Docente</h3>
+                <p>Jhonny Roberto Felipez Andrade</p>
+            </div>
+        </div>
+    </section>
+
+    <footer>
+        <p>© 2025 - David Sullcani Chuquimia - Programación Gráfica</p>
+        <p>Universidad Mayor de San Andrés (UMSA)</p>
+        <p>Docente: Jhonny Roberto Felipez Andrade</p>
+    </footer>
+
+    <!-- NUEVA SECCIÓN: Explorador de Archivos -->
+    <section class="file-explorer-section">
+        <h2>Explorador de Archivos del Repositorio</h2>
+        <div id="file-list" class="file-explorer"></div>
+    </section>
+
+</div>
 
 <script>
+// Animación escritura para el nombre
+document.addEventListener('DOMContentLoaded', function() {
+    const nameElement = document.querySelector('.name');
+    const fullName = 'David Sullcani Chuquimia';
+    let i = 0;
+    function typeWriter() {
+        if (i < fullName.length) {
+            nameElement.textContent += fullName.charAt(i);
+            i++;
+            setTimeout(typeWriter, 100);
+        }
+    }
+    nameElement.textContent = '';
+    setTimeout(typeWriter, 500);
+});
+
+// Explorador de archivos
 const user = 'dsullcanic-sys';
 const repo = 'INF-323---Programaci-n-Grafica';
-const branch = 'main'; // o master
+const branch = 'main';
 const fileListDiv = document.getElementById('file-list');
-const iframe = document.getElementById('file-frame');
 
 async function loadFiles(path='') {
     const url = `https://api.github.com/repos/${user}/${repo}/contents/${path}?ref=${branch}`;
@@ -61,7 +141,7 @@ async function loadFiles(path='') {
             div.innerHTML = `📁 <a href="#" onclick="loadFiles('${item.path}')">${item.name}</a>`;
         } else if(item.type === 'file') {
             if(item.name === 'index.html') {
-                div.innerHTML = `📄 ${item.name} <a href="#" onclick="iframe.src='https://dsullcanic-sys.github.io/${repo}/${item.path}'">Abrir en iframe</a>`;
+                div.innerHTML = `📄 ${item.name} <a href="https://dsullcanic-sys.github.io/${repo}/${item.path}" target="_blank">Abrir nueva pantalla</a>`;
             } else if(item.name.endsWith('.mp3')) {
                 div.innerHTML = `🎵 ${item.name} <audio controls src="${item.download_url}"></audio>`;
             } else {
@@ -72,9 +152,7 @@ async function loadFiles(path='') {
     });
 }
 
-// Inicial
 loadFiles();
 </script>
-</div>
 </body>
 </html>
