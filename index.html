@@ -146,22 +146,26 @@ async function loadFiles(path='') {
     }
 
     data.forEach(item => {
-        const div = document.createElement('div');
-        div.className = 'file-item';
-        if(item.type === 'dir') {
-            div.innerHTML = `<i class="fas fa-folder"></i> <a href="#" onclick="loadFiles('${item.path}')">${item.name}</a>`;
-        } else if(item.type === 'file') {
-            if(item.name.endsWith('.html')) {
-                let htmlUrl = baseUrlPages + item.path.replace(/ /g, '%20');
-                div.innerHTML = `<i class="fas fa-file-code"></i> ${item.name} <a href="${htmlUrl}" target="_blank">Abrir página</a>`;
-            } else if(item.name.endsWith('.mp3')) {
-                div.innerHTML = `<i class="fas fa-music"></i> ${item.name} <div class="audio-player"><audio controls src="${item.download_url}"></audio></div>`;
-            } else {
-                div.innerHTML = `<i class="fas fa-file"></i> ${item.name} <a href="${item.download_url}" target="_blank">Ver/Descargar</a>`;
-            }
+    // Ignorar index.html en la raíz
+    if(path === '' && item.name.toLowerCase() === 'index.html') return;
+
+    const div = document.createElement('div');
+    div.className = 'file-item';
+    if(item.type === 'dir') {
+        div.innerHTML = `<i class="fas fa-folder"></i> <a href="#" onclick="loadFiles('${item.path}')">${item.name}</a>`;
+    } else if(item.type === 'file') {
+        if(item.name.endsWith('.html')) {
+            let htmlUrl = baseUrlPages + item.path.replace(/ /g, '%20');
+            div.innerHTML = `<i class="fas fa-file-code"></i> ${item.name} <a href="${htmlUrl}" target="_blank">Abrir página</a>`;
+        } else if(item.name.endsWith('.mp3')) {
+            div.innerHTML = `<i class="fas fa-music"></i> ${item.name} <div class="audio-player"><audio controls src="${item.download_url}"></audio></div>`;
+        } else {
+            div.innerHTML = `<i class="fas fa-file"></i> ${item.name} <a href="${item.download_url}" target="_blank">Ver/Descargar</a>`;
         }
-        fileListDiv.appendChild(div);
-    });
+    }
+    fileListDiv.appendChild(div);
+});
+
 }
 
 loadFiles();
