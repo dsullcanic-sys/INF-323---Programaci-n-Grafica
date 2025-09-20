@@ -141,7 +141,8 @@ async function loadFiles(path='') {
             div.innerHTML = `📁 <a href="#" onclick="loadFiles('${item.path}')">${item.name}</a>`;
         } else if(item.type === 'file') {
             if(item.name === 'index.html') {
-                div.innerHTML = `📄 ${item.name} <a href="https://dsullcanic-sys.github.io/${repo}/${item.path}" target="_blank">Abrir nueva pantalla</a>`;
+                // Enlace relativo para abrir nueva pantalla
+                div.innerHTML = `📄 ${item.name} <a href="${item.path}" target="_blank">Abrir nueva pantalla</a>`;
             } else if(item.name.endsWith('.mp3')) {
                 div.innerHTML = `🎵 ${item.name} <audio controls src="${item.download_url}"></audio>`;
             } else {
