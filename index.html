@@ -30,15 +30,8 @@ footer { text-align:center; margin-top:50px; padding:20px; border-top:2px solid 
 .file-item { padding:5px 10px; border-radius:5px; transition: background 0.2s;}
 .file-item:hover { background: rgba(255,255,255,0.1);}
 .file-item a { color:#fff; text-decoration:none; font-weight:bold;}
-.file-item.dir > span {
-    cursor: pointer;
-    color: #add8e6;
-    transition: color 0.2s;
-}
-.file-item.dir > span:hover {
-    color: #ffffff;
-}
-
+.file-item.dir > span { cursor: pointer; color:#add8e6; transition: color 0.2s; }
+.file-item.dir > span:hover { color:#ffffff; }
 .file-item .nested { display:none; margin-left:20px; }
 .audio-player { margin-top:5px;}
 .file-item i { margin-right:8px;}
@@ -137,7 +130,6 @@ async function loadTree(path='') {
     ul.style.paddingLeft = '0';
 
     data.forEach(item => {
-        // Ignorar index.html en raíz
         if(path === '' && item.name.toLowerCase() === 'index.html') return;
 
         const li = document.createElement('li');
@@ -155,7 +147,7 @@ async function loadTree(path='') {
             span.addEventListener('click', () => {
                 if(nestedDiv.style.display === 'block') nestedDiv.style.display = 'none';
                 else {
-                    nestedDiv.innerHTML = ''; // limpiar antes de cargar
+                    nestedDiv.innerHTML = '';
                     loadTree(item.path).then(innerUl => nestedDiv.appendChild(innerUl));
                     nestedDiv.style.display = 'block';
                 }
