@@ -25,25 +25,15 @@ h3 { font-size:1.4rem; margin:20px 0 10px; color:#8ec5fc;}
 .teacher-icon { font-size:2rem; margin-right:15px; color:#6ab1e7;}
 footer { text-align:center; margin-top:50px; padding:20px; border-top:2px solid rgba(255,255,255,0.1); color:#cccccc;}
 
-/* Explorador visual */
+/* Explorador tipo árbol */
 .file-explorer { background: rgba(0,0,0,0.2); padding:15px; border-radius:10px; margin:20px 0; font-family: monospace;}
-.file-item { margin:5px 0; padding:5px 10px; border-radius:5px; transition: background 0.2s;}
-.file-item a { color:#fff; text-decoration:none; font-weight:bold;}
+.file-item { padding:5px 10px; border-radius:5px; transition: background 0.2s;}
 .file-item:hover { background: rgba(255,255,255,0.1);}
-.file-item.dir { color:#add8e6; cursor:pointer;}
-.file-item .nested { margin-left:20px; }
-.audio-player { margin-top:5px; }
-
-/* Iconos */
-.file-item i { margin-right:8px; }
-
-@media (max-width:768px){
-    h1 { font-size:2rem;}
-    h2 { font-size:1.5rem;}
-    .avatar { width:120px; height:120px; font-size:2.5rem;}
-    .teacher-info { flex-direction:column; text-align:center;}
-    .teacher-icon { margin-right:0; margin-bottom:10px;}
-}
+.file-item a { color:#fff; text-decoration:none; font-weight:bold;}
+.file-item.dir > span { cursor:pointer; color:#add8e6;}
+.file-item .nested { display:none; margin-left:20px; }
+.audio-player { margin-top:5px;}
+.file-item i { margin-right:8px;}
 </style>
 </head>
 <body>
@@ -72,7 +62,7 @@ footer { text-align:center; margin-top:50px; padding:20px; border-top:2px solid 
         https://github.com/dsullcanic-sys/INF-323---Programaci-n-Grafica.git
     </div>
 
-    <!-- EXPLORADOR VISUAL -->
+    <!-- EXPLORADOR TIPO ÁRBOL -->
     <section class="file-explorer-section">
         <h2>Explorador de Archivos del Repositorio</h2>
         <div id="file-list" class="file-explorer"></div>
@@ -106,7 +96,7 @@ footer { text-align:center; margin-top:50px; padding:20px; border-top:2px solid 
 </div>
 
 <script>
-// Animación escritura para el nombre
+// Animación escritura
 document.addEventListener('DOMContentLoaded', function() {
     const nameElement = document.querySelector('.name');
     const fullName = 'David Sullcani Chuquimia';
@@ -122,53 +112,65 @@ document.addEventListener('DOMContentLoaded', function() {
     setTimeout(typeWriter, 500);
 });
 
-// Explorador de archivos visual
+// Explorador tipo árbol
 const user = 'dsullcanic-sys';
 const repo = 'INF-323---Programaci-n-Grafica';
 const branch = 'main';
 const baseUrlPages = `https://${user}.github.io/${repo}/`;
 const fileListDiv = document.getElementById('file-list');
 
-async function loadFiles(path='') {
+async function loadTree(path='') {
     const url = `https://api.github.com/repos/${user}/${repo}/contents/${path}?ref=${branch}`;
     const res = await fetch(url);
     const data = await res.json();
 
-    fileListDiv.innerHTML = '';
-
-    // Subir carpeta
-    if(path) {
-        const upDiv = document.createElement('div');
-        upDiv.className = 'file-item';
-        const parentPath = path.split('/').slice(0,-1).join('/');
-        upDiv.innerHTML = `<i class="fas fa-level-up-alt"></i> <a href="#" onclick="loadFiles('${parentPath}')">Subir carpeta</a>`;
-        fileListDiv.appendChild(upDiv);
-    }
+    const ul = document.createElement('ul');
+    ul.style.listStyle = 'none';
+    ul.style.paddingLeft = '0';
 
     data.forEach(item => {
-        // Ignorar index.html en la raíz
+        // Ignorar index.html en raíz
         if(path === '' && item.name.toLowerCase() === 'index.html') return;
 
-        const div = document.createElement('div');
-        div.className = 'file-item';
+        const li = document.createElement('li');
+        li.className = 'file-item';
+
         if(item.type === 'dir') {
-            div.innerHTML = `<i class="fas fa-folder"></i> <a href="#" onclick="loadFiles('${item.path}')">${item.name}</a>`;
+            const span = document.createElement('span');
+            span.innerHTML = `<i class="fas fa-folder"></i> ${item.name}`;
+            li.appendChild(span);
+
+            const nestedDiv = document.createElement('div');
+            nestedDiv.className = 'nested';
+            li.appendChild(nestedDiv);
+
+            span.addEventListener('click', () => {
+                if(nestedDiv.style.display === 'block') nestedDiv.style.display = 'none';
+                else {
+                    nestedDiv.innerHTML = ''; // limpiar antes de cargar
+                    loadTree(item.path).then(innerUl => nestedDiv.appendChild(innerUl));
+                    nestedDiv.style.display = 'block';
+                }
+            });
+
         } else if(item.type === 'file') {
             if(item.name.endsWith('.html')) {
                 let htmlUrl = baseUrlPages + item.path.replace(/ /g, '%20');
-                let displayName = item.name.replace(/\.html$/i, ''); // quitar .html
-                div.innerHTML = `<i class="fas fa-file-code"></i> <a href="${htmlUrl}" target="_blank">${displayName}</a>`;
+                let displayName = item.name.replace(/\.html$/i,'');
+                li.innerHTML = `<i class="fas fa-file-code"></i> <a href="${htmlUrl}" target="_blank">${displayName}</a>`;
             } else if(item.name.endsWith('.mp3')) {
-                div.innerHTML = `<i class="fas fa-music"></i> ${item.name} <div class="audio-player"><audio controls src="${item.download_url}"></audio></div>`;
+                li.innerHTML = `<i class="fas fa-music"></i> ${item.name} <div class="audio-player"><audio controls src="${item.download_url}"></audio></div>`;
             } else {
-                div.innerHTML = `<i class="fas fa-file"></i> ${item.name} <a href="${item.download_url}" target="_blank">Ver/Descargar</a>`;
+                li.innerHTML = `<i class="fas fa-file"></i> ${item.name} <a href="${item.download_url}" target="_blank">Ver/Descargar</a>`;
             }
         }
-        fileListDiv.appendChild(div);
+        ul.appendChild(li);
     });
+
+    return ul;
 }
 
-loadFiles();
+loadTree().then(ul => fileListDiv.appendChild(ul));
 </script>
 </body>
 </html>
