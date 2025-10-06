@@ -1,0 +1,331 @@
+<html lang="es">
+<head>
+  <title>Practica 3</title>
+  <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+  <style>
+    body {
+      background-color: black;
+      color: white;
+      font-family: Arial, sans-serif;
+      font-size: 32px;
+      font-weight: bold;
+      text-shadow: 2px 2px 4px #00ffff;
+    }
+  </style>
+</head>
+<body>
+  <h2>Frogger</h2>
+  <canvas id="webglcanvas" width="500" height="500"></canvas>
+  <p>Nivel: <span id="puntos">1</span></p>
+
+  <script id="vs" type="vertex">
+    #version 300 es
+    uniform vec2 uDesplaza;
+    uniform vec2 uEscala;
+    uniform mat4 uMatrizProyeccion;
+    layout(location = 0) in vec2 aVertices;
+    void main() {
+      vec2 vertices = (aVertices * uEscala) + uDesplaza;
+      gl_Position = uMatrizProyeccion * vec4(vertices, 0.0, 1.0);
+    }
+  </script>
+
+  <script id="fs" type="fragment">
+    #version 300 es
+    precision mediump float;
+    uniform vec4 uColor;
+    out vec4 color;
+    void main() {
+      color = uColor;
+    }
+  </script>
+
+  <script>
+    // función que genera la matriz ortogonal 4x4
+    function ortho(r, izq, der, abj, arr, cerca, lejos) {
+      r[0]  = 2 / (der - izq); r[4]  = 0;                 r[8]  = 0;                 r[12] = -(der + izq) / (der - izq);
+      r[1]  = 0;                 r[5]  = 2 / (arr - abj); r[9]  = 0;                 r[13] = -(arr + abj) / (arr - abj);
+      r[2]  = 0;                 r[6]  = 0;                 r[10] = -2 / (lejos - cerca); r[14] = -(lejos + cerca) / (lejos - cerca);
+      r[3]  = 0;                 r[7]  = 0;                 r[11] = 0;                 r[15] = 1;
+    }
+
+    let MatrizProyeccion = new Array(16);
+    let uMatrizProyeccion, uColor, uDesplaza, uEscala;
+    let numVerticesCirculo, circuloVAO, rectanguloVAO;
+    let canvas, gl;
+    let puntuacion = 1;
+    let velocidadBase = 0.03;
+
+    // objeto jugador sapo con su lógica de salto
+    const sapo = {
+      x: 0,
+      y: -4.5,
+      radio: 0.4,
+      saltando: false,
+      saltoObjetivo: -4,
+      velocidadSalto: 0.15,
+
+      reset() {
+        this.x = 0;
+        this.y = -4.5;
+        this.saltando = false;
+        this.saltoObjetivo = -4;
+      },
+
+      saltar() {
+        if (!this.saltando) {
+          if (this.y >= 4) {
+            puntuacion++;
+            document.getElementById('puntos').textContent = puntuacion;
+            velocidadBase *= 1.2;
+            this.reset();
+            resetAutos();
+          } else {
+            this.saltoObjetivo = this.y + 1;
+            this.saltando = true;
+          }
+        }
+      },
+
+      actualizar() {
+        if (this.saltando) {
+          if (this.y < this.saltoObjetivo) {
+            this.y += this.velocidadSalto;
+            if (this.y >= this.saltoObjetivo) {
+              this.y = this.saltoObjetivo;
+              this.saltando = false;
+            }
+          }
+        }
+      }
+    };
+
+    // paleta de colores para carriles
+    const colores = [
+      [1, 0, 0, 1],       // rojo
+      [0, 0, 1, 1],       // azul
+      [1, 1, 0, 1],       // amarillo
+      [1, 0.5, 0, 1],     // naranja
+      [0.5, 0, 0.5, 1]    // morado
+    ];
+
+    let autos = [];
+
+    // genera autos en carriles con colores y velocidades
+    function crearAutos() {
+      autos = [];
+
+      // carril inferior rojo
+      autos.push({x: -5, y: -3.5, ancho: 1, alto: 0.5, velocidad: velocidadBase, color: colores[0]});
+      autos.push({x: -1, y: -3.5, ancho: 1.5, alto: 0.5, velocidad: velocidadBase, color: colores[0]});
+      autos.push({x: 3, y: -3.5, ancho: 1, alto: 0.5, velocidad: velocidadBase, color: colores[0]});
+
+      // segundo carril azul
+      autos.push({x: 5, y: -1.5, ancho: 1.5, alto: 0.5, velocidad: -velocidadBase, color: colores[1]});
+      autos.push({x: 1, y: -1.5, ancho: 1, alto: 0.5, velocidad: -velocidadBase, color: colores[1]});
+      autos.push({x: -3, y: -1.5, ancho: 1.5, alto: 0.5, velocidad: -velocidadBase, color: colores[1]});
+
+      // carril central amarillo
+      autos.push({x: -5, y: 0.5, ancho: 1, alto: 0.5, velocidad: velocidadBase * 1.2, color: colores[2]});
+      autos.push({x: -1, y: 0.5, ancho: 1.5, alto: 0.5, velocidad: velocidadBase * 1.2, color: colores[2]});
+      autos.push({x: 3, y: 0.5, ancho: 1, alto: 0.5, velocidad: velocidadBase * 1.2, color: colores[2]});
+
+      // segundo carril superior naranja
+      autos.push({x: 5, y: 2.5, ancho: 1.5, alto: 0.5, velocidad: -velocidadBase * 0.9, color: colores[3]});
+      autos.push({x: 1.5, y: 2.5, ancho: 1, alto: 0.5, velocidad: -velocidadBase * 0.9, color: colores[3]});
+      autos.push({x: -3, y: 2.5, ancho: 1.5, alto: 0.5, velocidad: -velocidadBase * 0.9, color: colores[3]});
+
+      // carril superior morado
+      autos.push({x: -5, y: 4.5, ancho: 1, alto: 0.5, velocidad: velocidadBase * 1.3, color: colores[4]});
+      autos.push({x: -1, y: 4.5, ancho: 1.5, alto: 0.5, velocidad: velocidadBase * 1.3, color: colores[4]});
+      autos.push({x: 3, y: 4.5, ancho: 1, alto: 0.5, velocidad: velocidadBase * 1.3, color: colores[4]});
+    }
+
+    function resetAutos() {
+      crearAutos();
+    }
+
+    function actualizarAutos() {
+      autos.forEach(auto => {
+        auto.x += auto.velocidad;
+        if (auto.velocidad > 0 && auto.x > 6) auto.x = -6;
+        else if (auto.velocidad < 0 && auto.x < -6) auto.x = 6;
+      });
+    }
+
+    function colisionSapoAuto() {
+      for (let auto of autos) {
+        let dx = sapo.x - auto.x;
+        let dy = sapo.y - auto.y;
+        if (Math.abs(dx) < (auto.ancho/2 + sapo.radio) &&
+            Math.abs(dy) < (auto.alto/2 + sapo.radio)) {
+          return true;
+        }
+      }
+      return false;
+    }
+
+    function dentroCirculo(x, y) {
+      let dx = x - sapo.x;
+      let dy = y - sapo.y;
+      return (dx * dx + dy * dy) <= (sapo.radio * sapo.radio);
+    }
+
+    function dibujaZonas() {
+      gl.bindVertexArray(rectanguloVAO);
+
+      // zona azul de inicio
+      gl.uniform2f(uDesplaza, 0, -4.5);
+      gl.uniform2f(uEscala, 5, 1);
+      gl.uniform4f(uColor, 0.2, 0.5, 0.8, 1);
+      gl.drawArrays(gl.TRIANGLE_FAN, 0, 4);
+
+      // zona gris de carretera
+      gl.uniform2f(uDesplaza, 0, 0.5);
+      gl.uniform2f(uEscala, 5, 4.5);
+      gl.uniform4f(uColor, 0.3, 0.3, 0.3, 1);
+      gl.drawArrays(gl.TRIANGLE_FAN, 0, 4);
+
+      gl.bindVertexArray(null);
+    }
+
+    function dibuja() {
+      gl.clear(gl.COLOR_BUFFER_BIT);
+
+      sapo.actualizar();
+      actualizarAutos();
+
+      if (colisionSapoAuto()) {
+        alert("Fin de la partida al Nivel " + puntuacion);
+        puntuacion = 1;
+        velocidadBase = 0.03;
+        document.getElementById('puntos').textContent = puntuacion;
+        sapo.reset();
+        resetAutos();
+      }
+
+      dibujaZonas();
+
+      // dibujar autos
+      gl.bindVertexArray(rectanguloVAO);
+      autos.forEach(auto => {
+        gl.uniform2f(uDesplaza, auto.x, auto.y);
+        gl.uniform2f(uEscala, auto.ancho, auto.alto);
+        gl.uniform4f(uColor, ...auto.color);
+        gl.drawArrays(gl.TRIANGLE_FAN, 0, 4);
+      });
+      gl.bindVertexArray(null);
+
+      // dibujar sapo
+      gl.bindVertexArray(circuloVAO);
+      gl.uniform2f(uDesplaza, sapo.x, sapo.y);
+      gl.uniform2f(uEscala, sapo.radio, sapo.radio);
+      gl.uniform4f(uColor, 0, 0.8, 0.1, 1);
+      gl.drawArrays(gl.TRIANGLE_FAN, 0, numVerticesCirculo);
+      gl.bindVertexArray(null);
+
+      requestAnimationFrame(dibuja);
+    }
+
+    function crearVerticesCirculo(radio, segmentos) {
+      let vertices = [0, 0];
+      for (let i = 0; i <= segmentos; i++) {
+        let angulo = i * 2 * Math.PI / segmentos;
+        let x = radio * Math.cos(angulo);
+        let y = radio * Math.sin(angulo);
+        vertices.push(x, y);
+      }
+      return new Float32Array(vertices);
+    }
+
+    function main() {
+      // obtener el canvas y el contexto webgl2
+      canvas = document.getElementById("webglcanvas");
+      gl = canvas.getContext("webgl2");
+
+      // definir el viewport del canvas
+      gl.viewport(0, 0, gl.canvas.width, gl.canvas.height);
+
+      // crear y compilar shader de vertices
+      let vs = gl.createShader(gl.VERTEX_SHADER);
+      gl.shaderSource(vs, document.getElementById("vs").text.trim());
+      gl.compileShader(vs);
+
+      // crear y compilar shader de fragmentos
+      let fs = gl.createShader(gl.FRAGMENT_SHADER);
+      gl.shaderSource(fs, document.getElementById("fs").text.trim());
+      gl.compileShader(fs);
+
+      // vincular shaders a un programa y usarlo
+      let programa = gl.createProgram();
+      gl.attachShader(programa, vs);
+      gl.attachShader(programa, fs);
+      gl.linkProgram(programa);
+      gl.useProgram(programa);
+
+      // crear vertices del sapo como circulo
+      let verticesCirculo = crearVerticesCirculo(1, 30);
+      numVerticesCirculo = verticesCirculo.length / 2;
+
+      // configurar VAO y buffer para el sapo
+      circuloVAO = gl.createVertexArray();
+      gl.bindVertexArray(circuloVAO);
+      let bufferCirculo = gl.createBuffer();
+      gl.bindBuffer(gl.ARRAY_BUFFER, bufferCirculo);
+      gl.bufferData(gl.ARRAY_BUFFER, verticesCirculo, gl.STATIC_DRAW);
+      gl.vertexAttribPointer(0, 2, gl.FLOAT, false, 0, 0);
+      gl.enableVertexAttribArray(0);
+
+      // configurar VAO y buffer para rectangulos - autos y zonas
+      let verticesRect = [-1, -1, 1, -1, 1, 1, -1, 1];
+      rectanguloVAO = gl.createVertexArray();
+      gl.bindVertexArray(rectanguloVAO);
+      let bufferRect = gl.createBuffer();
+      gl.bindBuffer(gl.ARRAY_BUFFER, bufferRect);
+      gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(verticesRect), gl.STATIC_DRAW);
+      gl.vertexAttribPointer(0, 2, gl.FLOAT, false, 0, 0);
+      gl.enableVertexAttribArray(0);
+      gl.bindVertexArray(null);
+
+      // obtener ubicaciones de uniforms en los shaders
+      uColor = gl.getUniformLocation(programa, "uColor");
+      uDesplaza = gl.getUniformLocation(programa, "uDesplaza");
+      uEscala = gl.getUniformLocation(programa, "uEscala");
+      uMatrizProyeccion = gl.getUniformLocation(programa, "uMatrizProyeccion");
+
+      // establecer matriz ortogonal 4x4 para coordenadas del mundo
+      ortho(MatrizProyeccion, -5, 5, -5, 5, -1, 1);
+      gl.uniformMatrix4fv(uMatrizProyeccion, false, MatrizProyeccion);
+
+      // limpiar pantalla con negro
+      gl.clearColor(0, 0, 0, 1);
+
+      // inicializar autos en sus carriles
+      crearAutos();
+
+      // manejar clics para saltar el sapo
+      canvas.addEventListener('click', e => {
+        const rect = canvas.getBoundingClientRect();
+        const xCanvas = ((e.clientX - rect.left) / rect.width) * 2 - 1;
+        const yCanvas = -(((e.clientY - rect.top) / rect.height) * 2 - 1);
+        const xMundo = xCanvas * 5;
+        const yMundo = yCanvas * 5;
+        if (Math.hypot(xMundo - sapo.x, yMundo - sapo.y) <= sapo.radio) sapo.saltar();
+      });
+
+      // manejar teclado para saltar el sapo (barra espaciadora)
+      document.addEventListener('keydown', e => {
+        if (e.code === 'Space' || e.key === ' ') {
+          e.preventDefault();
+          sapo.saltar();
+        }
+      });
+
+      // iniciar ciclo de dibujo continuo
+      dibuja();
+    }
+
+    window.onload = main;
+  </script>
+</body>
+</html>
