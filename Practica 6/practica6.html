@@ -6,45 +6,7 @@
   <meta http-equiv="content-type" content="text/html;charset=utf-8">
 </head>
 <body>
-  <div id="content">
-    <div id="opciones">
-      <h2>Panel de Control</h2>
-      <fieldset>
-        <legend><h3>Cámara</h3></legend>
-        <div class="button-group">
-          <button id="rotarArriba"> Arriba</button>
-          <button id="rotarAbajo"> Abajo</button>
-          <button id="rotarIzquierda"> Izquierda</button>
-          <button id="rotarDerecha"> Derecha</button>
-        </div>
-      </fieldset>
-      
-      <fieldset>
-        <legend><h3>Zoom</h3></legend>
-        <div class="button-group">
-          <button id="zoomIn"> + Acercar</button>
-          <button id="zoomOut"> - Alejar</button>
-        </div>
-      </fieldset>
-      
-      <fieldset>
-        <legend><h3>Rotación</h3></legend>
-        <div class="button-group">
-          <button id="rotarX"> Eje X</button>
-          <button id="rotarY"> Eje Y</button>
-          <button id="rotarZ"> Eje Z</button>
-        </div>
-      </fieldset>
-      
-      <button id="reset"> Reiniciar</button>
-    </div>
-    
-    <div id="canvas-holder">
-      <canvas id="webglcanvas" style="border: none; background: linear-gradient(to bottom, #87CEEB, #E0F6FF);" width="500" height="500"></canvas>
-      <div id="loading"> Cargando modelo 3D...</div>
-    </div>
-  </div>
-
+  <div id="main_panel"></div>
   <!-- Shaders -->
   <script id="vs" type="vertex">
     #version 300 es
@@ -57,7 +19,6 @@
     out vec3 vNormales;
     out vec3 vPosicion;
     out vec2 vTexCoords;
-    
     void main() {
       vNormales = mat3(uMatrizModelo) * aNormales;
       vec4 posicionMundo = uMatrizModelo * vec4(aVertices, 1.0);
@@ -66,7 +27,6 @@
       gl_Position = uMatrizProyeccion * uMatrizVista * posicionMundo;
     }
   </script>
-
   <script id="fs" type="fragment">
     #version 300 es
     precision highp float;
@@ -76,23 +36,19 @@
     out vec4 color;
     uniform sampler2D uTextura;
     uniform bool uTieneTextura;
-    
     void main() {
       vec3 normal = normalize(vNormales);
       vec3 luzDir = normalize(vec3(1.0, 1.0, 1.0));
       float difusa = max(dot(normal, luzDir), 0.0);
       vec3 ambiente = vec3(0.3, 0.3, 0.3);
-      
       vec3 colorBase = vec3(0.8, 0.6, 0.4);
       if (uTieneTextura) {
         colorBase = texture(uTextura, vTexCoords).rgb;
       }
-      
       vec3 colorFinal = colorBase * (ambiente + difusa * 0.7);
       color = vec4(colorFinal, 1.0);
     }
   </script>
-
   <script>
     "use strict";
 
@@ -983,8 +939,14 @@
 
       dibuja();
     }
-    
-    window.onload = main;
+  </script>
+      <script>
+    fetch('componentes/paneles.html')
+      .then(res => res.text())
+      .then(html => {
+        document.getElementById('main_panel').innerHTML = html;
+        main();
+      });
   </script>
 </body>
 </html>
