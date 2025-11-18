@@ -1,144 +1,7 @@
 <!DOCTYPE HTML>
 <html>
 <head>
-  <style type="text/css">
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
-    
-    body {
-      font-family: Arial, sans-serif;
-      background-color: #2a2a2a;
-      height: 100vh;
-      overflow: hidden;
-    }
-    
-    #content {
-      display: flex;
-      height: 100vh;
-      width: 100vw;
-    }
-    
-    #opciones {
-      width: 280px;
-      background-color: #3a3a3a;
-      padding: 20px;
-      overflow-y: auto;
-      border-right: 2px solid #555;
-      box-shadow: 2px 0 10px rgba(0,0,0,0.5);
-    }
-    
-    #canvas-holder {
-      flex: 1;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      background: linear-gradient(135deg, #1a1a1a 0%, #2a2a2a 100%);
-    }
-    
-    #webglcanvas {
-      width: 90%;
-      height: 90%;
-      max-width: 1200px;
-      max-height: 900px;
-      border: 3px solid #555;
-      border-radius: 8px;
-      box-shadow: 0 8px 32px rgba(0,0,0,0.7);
-    }
-    
-    fieldset {
-      border: 1px solid #555;
-      border-radius: 6px;
-      padding: 15px;
-      margin-bottom: 15px;
-      background-color: #424242;
-    }
-    
-    legend {
-      color: #fff;
-      font-weight: bold;
-      padding: 0 10px;
-    }
-    
-    button {
-      width: 100%;
-      padding: 12px;
-      margin: 8px 0;
-      background-color: #4CAF50;
-      color: white;
-      border: none;
-      border-radius: 4px;
-      cursor: pointer;
-      font-size: 13px;
-      font-weight: 500;
-      transition: all 0.3s;
-      text-align: left;
-      padding-left: 12px;
-    }
-    
-    button:hover {
-      background-color: #45a049;
-      transform: translateX(5px);
-    }
-    
-    button:active {
-      transform: scale(0.98);
-    }
-    
-    #reset {
-      background-color: #f44336;
-      margin-top: 15px;
-      font-weight: bold;
-    }
-    
-    #reset:hover {
-      background-color: #da190b;
-    }
-    
-    button.activo {
-      background-color: #2196F3;
-    }
-    
-    button.activo:hover {
-      background-color: #0b7dda;
-    }
-    
-    .button-group {
-      margin-bottom: 8px;
-    }
-    
-    h3 {
-      margin: 0;
-      color: #64B5F6;
-      font-size: 13px;
-      text-transform: uppercase;
-      letter-spacing: 1px;
-    }
-    
-    #loading {
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      font-size: 20px;
-      color: #888;
-      background: rgba(0,0,0,0.7);
-      padding: 30px;
-      border-radius: 8px;
-      z-index: 100;
-    }
-    
-    h2 {
-      color: #64B5F6;
-      text-align: center;
-      padding: 15px;
-      border-bottom: 2px solid #555;
-      margin-bottom: 15px;
-      font-size: 16px;
-    }
-  </style>
+  <link rel="stylesheet" href="css/styles.css">
   <title>Visor GLB con Cuaterniones - WebGL 2.0</title>
   <meta http-equiv="content-type" content="text/html;charset=utf-8">
 </head>
@@ -178,7 +41,7 @@
     
     <div id="canvas-holder">
       <canvas id="webglcanvas" style="border: none; background: linear-gradient(to bottom, #87CEEB, #E0F6FF);" width="500" height="500"></canvas>
-      <div id="loading">Cargando modelo 3D...</div>
+      <div id="loading"> Cargando modelo 3D...</div>
     </div>
   </div>
 
@@ -220,7 +83,6 @@
       float difusa = max(dot(normal, luzDir), 0.0);
       vec3 ambiente = vec3(0.3, 0.3, 0.3);
       
-      // Usar textura si existe, sino color por defecto
       vec3 colorBase = vec3(0.8, 0.6, 0.4);
       if (uTieneTextura) {
         colorBase = texture(uTextura, vTexCoords).rgb;
@@ -257,16 +119,11 @@
     let MatrizRotacion = new Array(16);
     let B = new Array(16);
     let boton_izq_presionado = false;
-    let boton_der_presionado = false;
-    let traslacionX = 0;
-    let traslacionY = 0;
-    let ultimoX = 0;
-    let ultimoY = 0;
 
     /* Para las animaciones de cámara */
     let anguloVertical = 0;
     let anguloHorizontal = 0;
-    let distanciaCamara = 10;
+    let distanciaCamara = 3;
     let rotacionObjetoX = 0;
     let rotacionObjetoY = 0;
     let rotacionObjetoZ = 0;
@@ -288,12 +145,11 @@
     const VELOCIDAD_CAMARA = 0.4;
 
     /***************************************************************************/
-    /* GLTF/GLB Loader Mejorado                                                */
+    /* GLTF/GLB Loader                                                         */
     /***************************************************************************/
     class GLTFLoader {
       async load(url) {
         try {
-          console.log('Intentando cargar:', url);
           const response = await fetch(url);
           
           if (!response.ok) {
@@ -301,8 +157,6 @@
           }
           
           const arrayBuffer = await response.arrayBuffer();
-          console.log('Archivo cargado, tamaño:', arrayBuffer.byteLength, 'bytes');
-          
           return this.parse(arrayBuffer);
         } catch (error) {
           console.error('Error en load():', error);
@@ -314,44 +168,34 @@
         try {
           const dataView = new DataView(arrayBuffer);
           
-          // Leer header GLB
           const magic = dataView.getUint32(0, true);
-          console.log('Magic number:', magic.toString(16));
           
-          if (magic !== 0x46546C67) { // "glTF"
+          if (magic !== 0x46546C67) {
             throw new Error('No es un archivo GLB válido (magic number incorrecto)');
           }
 
           const version = dataView.getUint32(4, true);
           const length = dataView.getUint32(8, true);
-          console.log('Versión GLB:', version, 'Tamaño total:', length);
 
-          // Leer chunk JSON
           const jsonChunkLength = dataView.getUint32(12, true);
           const jsonChunkType = dataView.getUint32(16, true);
-          console.log('JSON chunk length:', jsonChunkLength);
           
           const jsonData = new Uint8Array(arrayBuffer, 20, jsonChunkLength);
           const jsonString = new TextDecoder().decode(jsonData);
           const gltf = JSON.parse(jsonString);
-          console.log('GLTF parseado:', gltf);
 
-          // Leer chunk BIN (puede haber múltiples)
           const binChunkStart = 20 + jsonChunkLength;
           const binChunkLength = dataView.getUint32(binChunkStart, true);
           const binData = new Uint8Array(arrayBuffer, binChunkStart + 8, binChunkLength);
-          console.log('BIN chunk length:', binChunkLength);
 
-          // Extraer texturas si existen
           let texturas = null;
           if (gltf.images && gltf.images.length > 0) {
-            console.log('Encontradas', gltf.images.length, 'imágenes');
             texturas = this.parseTexturas(gltf, binData);
           }
 
           const geometria = this.parseGeometry(gltf, binData);
           geometria.texturas = texturas;
-          
+
           return geometria;
         } catch (error) {
           console.error('Error en parse():', error);
@@ -365,7 +209,6 @@
           
           for (let i = 0; i < gltf.images.length; i++) {
             const image = gltf.images[i];
-            console.log('Procesando imagen:', i, image);
             
             if (image.bufferView !== undefined) {
               const bufferView = gltf.bufferViews[image.bufferView];
@@ -381,8 +224,6 @@
                 url: url,
                 mimeType: image.mimeType || 'image/png'
               });
-              
-              console.log('Textura cargada:', texturas[i].nombre);
             }
           }
           
@@ -395,71 +236,42 @@
 
       parseGeometry(gltf, binData) {
         try {
-          console.log('Parseando geometría...');
-          
           if (!gltf.meshes || gltf.meshes.length === 0) {
             throw new Error('No se encontraron meshes en el archivo GLB');
           }
 
           const mesh = gltf.meshes[0];
-          console.log('Mesh encontrado:', mesh);
           
           if (!mesh.primitives || mesh.primitives.length === 0) {
             throw new Error('No se encontraron primitivas en el mesh');
           }
 
           const primitive = mesh.primitives[0];
-          console.log('Primitive:', primitive);
           
-          // Obtener posiciones (vértices)
           const positions = this.getAccessorData(gltf, binData, primitive.attributes.POSITION);
-          console.log('Vértices cargados:', positions.length / 3);
           
-          // Obtener normales (pueden no existir)
           let normals = null;
           if (primitive.attributes.NORMAL !== undefined) {
             normals = this.getAccessorData(gltf, binData, primitive.attributes.NORMAL);
-            console.log('Normales cargadas:', normals.length / 3);
           } else {
-            // Generar normales si no existen
-            console.log('Generando normales...');
             normals = this.generateNormals(positions);
           }
           
-          // Obtener coordenadas de textura (si existen)
           let texCoords = null;
           if (primitive.attributes.TEXCOORD_0 !== undefined) {
             texCoords = this.getAccessorData(gltf, binData, primitive.attributes.TEXCOORD_0);
-            console.log('Coordenadas de textura cargadas:', texCoords.length / 2);
           }
           
-          // Obtener índices
           let indices = null;
           if (primitive.indices !== undefined) {
             indices = this.getAccessorData(gltf, binData, primitive.indices);
-            console.log('Índices cargados:', indices.length);
-          } else {
-            console.log('Sin índices, usando vértices directamente');
-          }
-          
-          // Obtener información de materiales
-          let materialInfo = null;
-          if (primitive.material !== undefined && gltf.materials) {
-            const material = gltf.materials[primitive.material];
-            materialInfo = {
-              name: material.name || 'material',
-              doubleSided: material.doubleSided || false,
-              pbr: material.pbrMetallicRoughness || {}
-            };
-            console.log('Material encontrado:', materialInfo);
           }
 
           return {
             vertices: positions,
             normales: normals,
             texCoords: texCoords,
-            indices: indices,
-            material: materialInfo
+            indices: indices
           };
         } catch (error) {
           console.error('Error en parseGeometry():', error);
@@ -538,7 +350,7 @@
     }
 
     /***************************************************************************/
-    /* Se crean, compilan y enlazan los programas Shader                       */
+    /* Shaders                                                                 */
     /***************************************************************************/
     function compilaEnlazaLosShaders() {
       let shaderDeVertice = gl.createShader(gl.VERTEX_SHADER);
@@ -567,7 +379,7 @@
     }
 
     /***************************************************************************/
-    /* Transformaciones mediante matrices                                      */
+    /* Transformaciones                                                        */
     /***************************************************************************/
     function toRadians(grados) {
       return grados * Math.PI / 180;
@@ -681,7 +493,7 @@
     }
 
     /***************************************************************************/
-    /* La Clase Vector3                                                        */
+    /* Vector3                                                                 */
     /***************************************************************************/
     class Vector3 {
       constructor(x, y, z) {
@@ -818,27 +630,22 @@
     /***************************************************************************/
     class ModeloGLB {
       constructor(gl, geometria) {
-        console.log('Creando ModeloGLB...');
-        
         this.gl = gl;
         this.modeloVAO = gl.createVertexArray();
         gl.bindVertexArray(this.modeloVAO);
 
-        // Vertices
         let codigoVertices = gl.createBuffer();
         gl.bindBuffer(gl.ARRAY_BUFFER, codigoVertices);
         gl.bufferData(gl.ARRAY_BUFFER, geometria.vertices, gl.STATIC_DRAW);
         gl.enableVertexAttribArray(0);
         gl.vertexAttribPointer(0, 3, gl.FLOAT, false, 0, 0);
 
-        // Normales
         let codigoNormales = gl.createBuffer();
         gl.bindBuffer(gl.ARRAY_BUFFER, codigoNormales);
         gl.bufferData(gl.ARRAY_BUFFER, geometria.normales, gl.STATIC_DRAW);
         gl.enableVertexAttribArray(1);
         gl.vertexAttribPointer(1, 3, gl.FLOAT, false, 0, 0);
 
-        // Coordenadas de Textura (si existen)
         if (geometria.texCoords) {
           let codigoTexCoords = gl.createBuffer();
           gl.bindBuffer(gl.ARRAY_BUFFER, codigoTexCoords);
@@ -846,27 +653,21 @@
           gl.enableVertexAttribArray(2);
           gl.vertexAttribPointer(2, 2, gl.FLOAT, false, 0, 0);
           this.tieneTexCoords = true;
-          console.log('Coordenadas de textura configuradas');
         } else {
           this.tieneTexCoords = false;
-          console.log('Sin coordenadas de textura');
         }
 
-        // Cargar texturas si existen
         this.texturaGL = null;
         if (geometria.texturas && geometria.texturas.length > 0) {
-          console.log('Cargando texturas...');
           this.texturaGL = this.crearTexturaDesdeURL(geometria.texturas[0].url);
         }
 
-        // Indices
         this.tieneIndices = false;
         this.tipoIndice = gl.UNSIGNED_SHORT;
         
         if (geometria.indices) {
           this.tieneIndices = true;
           
-          // Determinar el tipo de índice
           if (geometria.indices instanceof Uint32Array) {
             this.tipoIndice = gl.UNSIGNED_INT;
           } else if (geometria.indices instanceof Uint16Array) {
@@ -879,17 +680,13 @@
           gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, codigoDeIndices);
           gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, geometria.indices, gl.STATIC_DRAW);
           this.conteoIndices = geometria.indices.length;
-          console.log('Índices:', this.conteoIndices, 'Tipo:', this.tipoIndice);
         } else {
           this.conteoIndices = geometria.vertices.length / 3;
-          console.log('Sin índices, vértices directos:', this.conteoIndices);
         }
 
         gl.bindVertexArray(null);
         gl.bindBuffer(gl.ARRAY_BUFFER, null);
         gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, null);
-        
-        console.log('ModeloGLB creado exitosamente');
       }
 
       crearTexturaDesdeURL(url) {
@@ -905,7 +702,6 @@
           gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.REPEAT);
           gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR_MIPMAP_LINEAR);
           gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
-          console.log('Textura cargada en WebGL');
         };
         
         imagen.onerror = function() {
@@ -937,57 +733,36 @@
       posx = posx - canvas.offsetLeft;
       posy = posy - canvas.offsetTop;
 
-      if (event.button === 0) {
-        // Botón izquierdo: arcball
-        B = MatrizRotacion.slice();
-        arcBall.primerPunto(posx, posy);
-        boton_izq_presionado = true;
-      } else if (event.button === 2) {
-        // Botón derecho: pan/translate
-        boton_der_presionado = true;
-        ultimoX = posx;
-        ultimoY = posy;
-        event.preventDefault();
-      }
+      B = MatrizRotacion.slice();
+      arcBall.primerPunto(posx, posy);
+      boton_izq_presionado = true;
       return false;
     }
 
     function mouseUp(e){
       boton_izq_presionado = false;
-      boton_der_presionado = false;
     }
 
     function mouseMove(event) {
+      if (!boton_izq_presionado)
+        return false;
+
       let posx = event.x != undefined ? event.x : event.clientX + document.body.scrollLeft + document.documentElement.scrollLeft;
       let posy = event.y != undefined ? event.y : event.clientY + document.body.scrollTop + document.documentElement.scrollTop;
 
       posx = posx - canvas.offsetLeft;
       posy = posy - canvas.offsetTop;
 
-      if (boton_izq_presionado) {
-        // Arcball rotation
-        let q = arcBall.segundoPunto(posx, posy);
-        Cuaternion.rota2(MatrizRotacion, q);
-        multiplica(MatrizRotacion, MatrizRotacion, B);
-      } else if (boton_der_presionado) {
-        // Pan/translate (intuitive direction)
-        let deltaX = posx - ultimoX;
-        let deltaY = posy - ultimoY;
-        traslacionX += deltaX * 0.01;  // Mismo sentido
-        traslacionY -= deltaY * 0.01;  // Invertir Y porque pantalla va de arriba a abajo
-        
-        ultimoX = posx;
-        ultimoY = posy;
-      }
+      let q = arcBall.segundoPunto(posx, posy);
+      Cuaternion.rota2(MatrizRotacion, q);
+      multiplica(MatrizRotacion, MatrizRotacion, B);
     }
 
     function mouseWheel(event) {
       event.preventDefault();
       if (event.deltaY < 0) {
-        // Scroll up: zoom in
-        distanciaCamara = Math.max(2, distanciaCamara - VELOCIDAD_ZOOM * 3);
+        distanciaCamara = Math.max(1, distanciaCamara - VELOCIDAD_ZOOM * 3);
       } else {
-        // Scroll down: zoom out
         distanciaCamara = Math.min(50, distanciaCamara + VELOCIDAD_ZOOM * 3);
       }
       return false;
@@ -995,7 +770,7 @@
 
     /***************************************************************************/
     /* Funciones de Animación                                                  */
-    /****************************************************************************/
+    /***************************************************************************/
     function actualizaBotonActivo(idBoton, activo) {
       const boton = document.getElementById(idBoton);
       if (activo) {
@@ -1035,31 +810,22 @@
       actualizaBotonActivo('zoomOut', zoomOutActivo);
     }
 
+    function animarRotacionX() {
+      rotarXActivo = !rotarXActivo;
+      actualizaBotonActivo('rotarX', rotarXActivo);
+    }
+
+    function animarRotacionY() {
+      rotarYActivo = !rotarYActivo;
+      actualizaBotonActivo('rotarY', rotarYActivo);
+    }
+
     function animarRotacionZ() {
       rotarZActivo = !rotarZActivo;
       actualizaBotonActivo('rotarZ', rotarZActivo);
     }
 
-    function iniciaRotacionX() {
-      rotarXActivo = !rotarXActivo;
-      actualizaBotonActivo('rotarX', rotarXActivo);
-    }
-
-    function detienRotacionX() {
-      // No hacer nada - la rotación se controla con toggle
-    }
-
-    function iniciaRotacionY() {
-      rotarYActivo = !rotarYActivo;
-      actualizaBotonActivo('rotarY', rotarYActivo);
-    }
-
-    function detienRotacionY() {
-      // No hacer nada - la rotación se controla con toggle
-    }
-
     function actualizarCamara() {
-      // Calcular posición de la cámara en coordenadas esféricas
       let radianes_h = toRadians(anguloHorizontal);
       let radianes_v = toRadians(anguloVertical);
       
@@ -1073,7 +839,7 @@
     }
 
     /***************************************************************************/
-    /* Dibuja                                                                  */
+    /* Loop de Renderizado                                                     */
     /***************************************************************************/
     function dibuja() {
       gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
@@ -1083,14 +849,12 @@
         return;
       }
 
-      // Actualizar rotaciones continuas y zoom
       if (rotarXActivo) rotacionObjetoX += VELOCIDAD_ROTACION;
       if (rotarYActivo) rotacionObjetoY += VELOCIDAD_ROTACION;
       if (rotarZActivo) rotacionObjetoZ += VELOCIDAD_ROTACION;
-      if (zoomInActivo) distanciaCamara = Math.max(2, distanciaCamara - VELOCIDAD_ZOOM);
+      if (zoomInActivo) distanciaCamara = Math.max(1, distanciaCamara - VELOCIDAD_ZOOM);
       if (zoomOutActivo) distanciaCamara = Math.min(50, distanciaCamara + VELOCIDAD_ZOOM);
       
-      // Actualizar cámara
       if (camaraArribaActiva) {
         anguloVertical -= VELOCIDAD_CAMARA;
         if (anguloVertical < -89) anguloVertical = -89;
@@ -1102,25 +866,20 @@
       if (camaraIzquierdaActiva) anguloHorizontal += VELOCIDAD_CAMARA;
       if (camaraDerechaActiva) anguloHorizontal -= VELOCIDAD_CAMARA;
 
-      // Normalizar ángulos
       if (rotacionObjetoX >= 360) rotacionObjetoX -= 360;
       if (rotacionObjetoY >= 360) rotacionObjetoY -= 360;
       if (rotacionObjetoZ >= 360) rotacionObjetoZ -= 360;
 
-      // Actualizar la cámara
       actualizarCamara();
 
-      // Matriz del Modelo
       identidad(MatrizModelo);
-      traslacion(MatrizModelo, traslacionX, traslacionY, 0);
-      escalacion(MatrizModelo, 5, 5, 5);
+      escalacion(MatrizModelo, 1, 1, 1);
       rotacionX(MatrizModelo, rotacionObjetoX);
       rotacionY(MatrizModelo, rotacionObjetoY);
       rotacionZ(MatrizModelo, rotacionObjetoZ);
       multiplica(MatrizModelo, MatrizModelo, MatrizRotacion);
       gl.uniformMatrix4fv(uMatrizModelo, false, MatrizModelo);
 
-      // Configurar textura si existe
       if (modeloGLB && modeloGLB.texturaGL) {
         gl.uniform1i(uTieneTextura, true);
         gl.activeTexture(gl.TEXTURE0);
@@ -1139,16 +898,27 @@
       identidad(MatrizRotacion);
       anguloVertical = 0;
       anguloHorizontal = 0;
-      distanciaCamara = 10;
+      distanciaCamara = 3;
       rotacionObjetoX = 0;
       rotacionObjetoY = 0;
       rotacionObjetoZ = 0;
       rotarXActivo = false;
       rotarYActivo = false;
+      rotarZActivo = false;
+      zoomInActivo = false;
+      zoomOutActivo = false;
+      camaraArribaActiva = false;
+      camaraAbajoActiva = false;
+      camaraIzquierdaActiva = false;
+      camaraDerechaActiva = false;
+      
+      document.querySelectorAll('button.activo').forEach(btn => {
+        btn.classList.remove('activo');
+      });
     }
 
     /***************************************************************************/
-    /* Main                                                                    */
+    /* Inicialización                                                          */
     /***************************************************************************/
     async function main() {
       canvas = document.getElementById("webglcanvas");
@@ -1158,15 +928,12 @@
          return;
       }
 
-      // Eventos del ratón
       canvas.addEventListener("mousedown", mouseDown, false);
       canvas.addEventListener("mouseup", mouseUp, false);
       canvas.addEventListener("mouseout", mouseUp, false);
       canvas.addEventListener("mousemove", mouseMove, false);
       canvas.addEventListener("wheel", mouseWheel, false);
-      canvas.addEventListener("contextmenu", (e) => e.preventDefault(), false);
 
-      // Eventos de los botones
       document.getElementById("reset").onclick = reinicia;
       document.getElementById("rotarArriba").onclick = animarCamaraArriba;
       document.getElementById("rotarAbajo").onclick = animarCamaraAbajo;
@@ -1174,11 +941,9 @@
       document.getElementById("rotarDerecha").onclick = animarCamaraDerecha;
       document.getElementById("zoomIn").onclick = animarZoomIn;
       document.getElementById("zoomOut").onclick = animarZoomOut;
+      document.getElementById("rotarX").onclick = animarRotacionX;
+      document.getElementById("rotarY").onclick = animarRotacionY;
       document.getElementById("rotarZ").onclick = animarRotacionZ;
-      
-      // Eventos para rotación continua en X e Y (toggle con click)
-      document.getElementById("rotarX").onclick = iniciaRotacionX;
-      document.getElementById("rotarY").onclick = iniciaRotacionY;
 
       gl.viewport(0, 0, gl.canvas.width, gl.canvas.height);
       compilaEnlazaLosShaders();
@@ -1204,17 +969,16 @@
       gl.enable(gl.DEPTH_TEST);
       gl.clearColor(0.53, 0.81, 0.92, 1.0);
 
-      // Cargar el modelo GLB
       try {
         const loader = new GLTFLoader();
         const geometria = await loader.load('modelo/dragon.glb');
         modeloGLB = new ModeloGLB(gl, geometria);
         document.getElementById('loading').style.display = 'none';
-        console.log('Modelo GLB cargado correctamente');
+        console.log(' Modelo GLB cargado correctamente');
       } catch (error) {
-        console.error('Error al cargar el modelo GLB:', error);
+        console.error(' Error al cargar el modelo GLB:', error);
         document.getElementById('loading').innerHTML = 
-          '❌ Error al cargar el modelo.<br>Verifica que el archivo GLB esté en la carpeta "modelo/"';
+          ' Error al cargar el modelo.<br><br>Verifica:<br>1. Que el archivo glb esté en "modelo/"<br>2. Que estés usando un servidor local';
       }
 
       dibuja();
