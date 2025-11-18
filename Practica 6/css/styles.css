@@ -4,11 +4,12 @@
   box-sizing: border-box;
 }
 
+/* Fondo de imagen para todo el body (cambia la ruta por la tuya real) */
 body {
-  font-family: Arial, sans-serif;
-  background-color: #2a2a2a;
-  height: 100vh;
-  overflow: hidden;
+  background: url('imagenes/fondo.jpg') no-repeat center center fixed;
+  background-size: cover;
+  background-color: #2a2a2a; /* fallback */
+  min-height: 100vh;
 }
 
 #content {
@@ -31,9 +32,11 @@ body {
   display: flex;
   justify-content: center;
   align-items: center;
-  background: linear-gradient(135deg, #1a1a1a 0%, #2a2a2a 100%);
+  background: transparent !important; /* Quita degradado oscuro */
+  position: relative;
 }
 
+/* Canvas transparente para que se vea el fondo */
 #webglcanvas {
   width: 90%;
   height: 90%;
@@ -42,6 +45,7 @@ body {
   border: 3px solid #555;
   border-radius: 8px;
   box-shadow: 0 8px 32px rgba(0,0,0,0.7);
+  background: transparent !important;
 }
 
 fieldset {
@@ -96,7 +100,6 @@ button:active {
 button.activo {
   background-color: #2196F3;
 }
-
 button.activo:hover {
   background-color: #0b7dda;
 }
