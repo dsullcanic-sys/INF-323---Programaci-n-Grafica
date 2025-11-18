@@ -1,0 +1,17 @@
+Primero: Activar GitHub Pages
+Debes publicar tu repositorio con GitHub Pages:
+
+Ve a tu repositorio en GitHub
+
+- Click en Settings (Configuración)
+- En el menú lateral, busca Pages
+- En "Source", selecciona la rama main (o master)
+- Click en Save
+
+Espera 1-2 minutos
+
+Veras un mensaje como: "Your site is published at https://dsullcanic-sys.github.io/INF-323-Programacion-Grafica/"
+
+- Crea un archivo llamado index.html en la raíz de tu repositorio
+- Pega el código [index.html]
+- Commit
